@@ -28,7 +28,7 @@ Go to [aistudio.google.com](https://aistudio.google.com) → Get API key (free)
 ### 3. Configure environment
 
 ```bash
-cp .env.example .env
+.env
 # Edit .env and add your GEMINI_API_KEY
 ```
 
