@@ -1,57 +1,37 @@
-# AI Resume Analyzer
+# ai resume analyzer
 
-Upload a PDF resume and get instant AI-powered feedback — strengths, weaknesses, quick wins, and an overall score. Built with Flask + Google Gemini API.
+built this because i wanted feedback on my own resume without paying for those resume review sites. you upload a pdf and gemini reads it and gives you a score, strengths, weaknesses, and a few quick fixes. also roasts you a little at the end.
 
-## Features
+## how it works
 
-- Upload any PDF resume
-- Gemini reads the PDF natively (no text extraction needed)
-- Structured feedback: score, strengths, weaknesses, quick wins, missing keywords
-- Clean dark UI
-- Ready to deploy on Render
+you upload your resume as a pdf, flask saves it temporarily, sends it to gemini as raw binary (no text extraction needed, gemini reads it natively), gets the feedback back, then deletes the file. nothing is stored.
 
-## Setup
+## stack
 
-### 1. Clone & install
+- python + flask
+- google gemini api
+- html css js frontend
 
-```bash
-git clone <your-repo-url>
+## setup
+```
+get a free gemini api key from https://aistudio.google.com
+git clone https://github.com/X-4bys5/AI-Resume.git
+cd AI-Resume
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
-### 2. Get a Gemini API key
-
-Go to [aistudio.google.com](https://aistudio.google.com) → Get API key (free)
-
-### 3. Configure environment
-
-```bash
-.env
-# Edit .env and add your GEMINI_API_KEY
+create a .env file:
 ```
-
-### 4. Run locally
-
-```bash
+GEMINI_API_KEY=your_key_here
+```
+run it:
 python app.py
+
+go to http://localhost:5000
+
+## known issues
 ```
-
-Visit `http://localhost:5000`
-
-## Deploy to Render
-
-1. Push this project to GitHub
-2. Go to [render.com](https://render.com) → New Web Service
-3. Connect your GitHub repo
-4. Set environment variable: `GEMINI_API_KEY = your_key_here`
-5. Build command: `pip install -r requirements.txt`
-6. Start command: `gunicorn app:app`
-
-## Tech Stack
-
-- **Backend**: Python, Flask
-- **AI**: Google Gemini 2.5 Flash (native PDF reading)
-- **Deployment**: Render
-- **Frontend**: HTML, CSS, Vanilla JS
+- sometimes gemini returns markdown formatting even though i told it not to
+- very large pdfs can be slow
+```
