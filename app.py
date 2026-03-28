@@ -8,7 +8,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10mb limit resumes shouldnt be this big but just in case
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -85,7 +85,7 @@ def analyze():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if os.path.exists(filepath):
+        if os.path.exists(filepath):  # always delete after, dont want resumes sitting on the serve
             os.remove(filepath)
 
 
