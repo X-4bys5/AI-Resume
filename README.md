@@ -13,8 +13,9 @@ you upload your resume as a pdf, flask saves it temporarily, sends it to gemini 
 - html css js frontend
 
 ## setup
-```
+
 get a free gemini api key from https://aistudio.google.com
+```
 git clone https://github.com/X-4bys5/AI-Resume.git
 cd AI-Resume
 python -m venv venv
