@@ -85,7 +85,7 @@ def analyze():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if os.path.exists(filepath):  # always delete after, dont want resumes sitting on the serve
+        if os.path.exists(filepath):  # always delete after dont want resumes sitting on the serve
             os.remove(filepath)
 
 
