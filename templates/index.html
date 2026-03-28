@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeAI — Instant Resume Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #0e0e10;
+      color: #e8e6e0;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      color: #e8e6e0;
+    }
+
+    .logo span { color: #7F77DD; font-style: italic; }
+
+    .badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 4px 12px;
+      background: rgba(127,119,221,0.12);
+      color: #AFA9EC;
+      border: 0.5px solid rgba(127,119,221,0.28);
+      border-radius: 20px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      color: #f0eeea;
+    }
+
+    .hero h1 em { color: #7F77DD; font-style: italic; }
+
+    .hero p {
+      color: #888780;
+      font-size: 1rem;
+      font-weight: 300;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    .upload-wrap {
+      max-width: 520px;
+      margin: 2rem auto 1rem;
+      padding: 0 1.5rem;
+    }
+
+    .upload-zone {
+      border: 1px dashed rgba(127,119,221,0.35);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      background: rgba(127,119,221,0.04);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: rgba(127,119,221,0.65);
+      background: rgba(127,119,221,0.08);
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      background: rgba(127,119,221,0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .upload-label {
+      font-size: 0.95rem;
+      color: #b4b2a9;
+      margin-bottom: 0.4rem;
+    }
+
+    .upload-label strong { color: #AFA9EC; font-weight: 500; }
+
+    .upload-sub {
+      font-size: 0.78rem;
+      color: #5F5E5A;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .btn-wrap {
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 2rem;
+      background: #534AB7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 1rem;
+    }
+
+    .btn:hover:not(:disabled) { background: #7F77DD; }
+
+    .btn:disabled {
+      background: #2a2640;
+      color: #534AB7;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      display: none;
+    }
+
+    .loading-dots span {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #534AB7;
+      margin: 0 4px;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; transform: scale(0.75); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    .loading p {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #5F5E5A;
+    }
+
+    .result-section {
+      max-width: 680px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+      display: none;
+    }
+
+    .score-card {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(127,119,221,0.08);
+      border: 0.5px solid rgba(127,119,221,0.2);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .score-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: #7F77DD;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .score-label {
+      font-size: 0.75rem;
+      color: #888780;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .score-desc {
+      font-size: 0.95rem;
+      color: #b4b2a9;
+    }
+
+    .feedback-block {
+      background: #18181c;
+      border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .feedback-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .feedback-section h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 0.5px solid rgba(255,255,255,0.06);
+    }
+
+    .tag-strength { color: #5DCAA5; }
+    .tag-weakness { color: #F0997B; }
+    .tag-quickwin { color: #FAC775; }
+    .tag-missing  { color: #AFA9EC; }
+
+    .feedback-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.55rem 0;
+      font-size: 0.9rem;
+      color: #b4b2a9;
+      line-height: 1.55;
+      border-bottom: 0.5px solid rgba(255,255,255,0.04);
+    }
+
+    .feedback-item:last-child { border-bottom: none; }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.57rem;
+    }
+
+    .dot-green  { background: #5DCAA5; }
+    .dot-coral  { background: #F0997B; }
+    .dot-amber  { background: #FAC775; }
+    .dot-purple { background: #AFA9EC; }
+
+    .summary-box {
+      background: rgba(127,119,221,0.06);
+      border-left: 2px solid #534AB7;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      color: #d3d1c7;
+      font-style: italic;
+      line-height: 1.6;
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .roast-box {
+      background: rgba(250, 199, 117, 0.05);
+      border: 0.5px solid rgba(250, 199, 117, 0.2);
+      border-radius: 12px;
+      padding: 1.25rem 1.25rem 1.25rem 1rem;
+      margin-top: 1.5rem;
+      font-size: 0.92rem;
+      color: #b4b2a9;
+      line-height: 1.7;
+      display: none;
+    }
+
+    .roast-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #FAC775;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .roast-flame {
+      font-size: 14px;
+    }
+
+    .error-box {
+      margin-bottom: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(240,153,123,0.08);
+      border: 0.5px solid rgba(240,153,123,0.3);
+      border-radius: 10px;
+      color: #F0997B;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 1rem 1.25rem; }
+      .hero { padding: 2.5rem 1.25rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">Resume<span>AI</span></div>
+  </div>
+
+  <div class="hero">
+    <h1>Get <em>HONEST</em> feedback<br>on your resume</h1>
+    <p>Upload your PDF resume and get detailed AI analysis — strengths, weaknesses, quick wins, and more.</p>
+  </div>
+
+  <div class="upload-wrap">
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <p class="upload-label"><strong>Click to upload</strong> or drag & drop</p>
+      <p class="upload-sub" id="uploadSub">PDF only · max 10MB</p>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <div class="error-box" id="errorBox"></div>
+    <button class="btn" id="analyzeBtn" disabled>Analyze my resume</button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <p>The File is being processed by the Smartest AI😎…</p>
+  </div>
+
+  <div class="result-section" id="results">
+    <div class="score-card">
+      <div class="score-num" id="scoreNum">—</div>
+      <div>
+        <div class="score-label">Overall score</div>
+        <div class="score-desc" id="scoreDesc">—</div>
+      </div>
+    </div>
+
+    <div class="feedback-block">
+      <div class="feedback-section">
+        <h3 class="tag-strength">Strengths</h3>
+        <div id="strengthsList"></div>
+      </div>
+      <div class="feedback-section">
+        <h3 class="tag-weakness">Weaknesses / areas to improve</h3>
+        <div id="weaknessesList"></div>
+      </div>
+      <div class="feedback-section">
+        <h3 class="tag-quickwin">Quick wins</h3>
+        <div id="quickwinsList"></div>
+      </div>
+      <div class="feedback-section">
+        <h3 class="tag-missing">Missing sections or keywords</h3>
+        <div id="missingList"></div>
+      </div>
+
+      <div class="summary-box" id="summaryBox"></div>
+
+      <div class="roast-box" id="roastBox">
+        <div class="roast-label"><span class="roast-flame">🔥</span> Friendly roast</div>
+        <div id="roastText"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const zone      = document.getElementById('uploadZone');
+    const btn       = document.getElementById('analyzeBtn');
+    const loading   = document.getElementById('loading');
+    const results   = document.getElementById('results');
+    const errorBox  = document.getElementById('errorBox');
+    const uploadSub = document.getElementById('uploadSub');
+    let selectedFile = null;
+
+    zone.addEventListener('click', () => {
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.accept = '.pdf';
+      inp.onchange = e => setFile(e.target.files[0]);
+      inp.click();
+    });
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) setFile(f);
+    });
+
+    function setFile(f) {
+      if (!f.name.toLowerCase().endsWith('.pdf')) {
+        showError('Please upload a PDF file.');
+        return;
+      }
+      selectedFile = f;
+      zone.querySelector('.upload-label').innerHTML = `<strong>${f.name}</strong>`;
+      uploadSub.textContent = (f.size / 1024).toFixed(0) + ' KB selected';
+      btn.disabled = false;
+      hideError();
+    }
+
+    btn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      btn.disabled = true;
+      results.style.display = 'none';
+      loading.style.display = 'block';
+      hideError();
+
+      const fd = new FormData();
+      fd.append('resume', selectedFile);
+
+      try {
+        const res  = await fetch('/analyze', { method: 'POST', body: fd });
+        const data = await res.json();
+        loading.style.display = 'none';
+
+        if (data.error) {
+          showError(data.error);
+          btn.disabled = false;
+          return;
+        }
+
+        renderFeedback(data.feedback);
+        results.style.display = 'block';
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        loading.style.display = 'none';
+        showError('Could not reach the server. Is Flask running?');
+        btn.disabled = false;
+      }
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function hideError() {
+      errorBox.style.display = 'none';
+    }
+
+    function makeItems(lines, dotClass) {
+      return lines
+        .map(l => l.replace(/^[-•*]\s*/, '').trim())
+        .filter(Boolean)
+        .map(l => `
+          <div class="feedback-item">
+            <div class="dot ${dotClass}"></div>
+            <span>${l}</span>
+          </div>`)
+        .join('');
+    }
+
+    function extractSection(text, heading) {
+      const lines = text.split('\n');
+      let capturing = false;
+      const result = [];
+
+      for (let line of lines) {
+        if (line.match(new RegExp('^' + heading, 'i'))) {
+          capturing = true;
+          continue;
+        }
+        if (capturing) {
+          if (line.match(/^[A-Za-z]/) && line.trimEnd().endsWith(':')) break;
+          if (line.match(/^One Sentence/i)) break;
+          if (line.match(/^Roast/i)) break;
+          if (line.trim()) result.push(line);
+        }
+      }
+      return result;
+    }
+
+    function renderFeedback(text) {
+      text = text.replace(/\*\*/g, '');
+
+      // Score
+      const scoreMatch = text.match(/Overall Score[:\s]*(\d+)/i);
+      if (scoreMatch) {
+        const s = parseInt(scoreMatch[1]);
+        document.getElementById('scoreNum').textContent = s + '/10';
+        document.getElementById('scoreDesc').textContent =
+          s >= 8 ? 'Strong resume — well done' :
+          s >= 6 ? 'Solid foundation, room to grow' :
+          s >= 4 ? 'Needs meaningful improvements' :
+                   'Significant work required';
+      }
+
+      document.getElementById('strengthsList').innerHTML =
+        makeItems(extractSection(text, 'Strengths'), 'dot-green');
+
+      document.getElementById('weaknessesList').innerHTML =
+        makeItems(extractSection(text, 'Weaknesses'), 'dot-coral');
+
+      document.getElementById('quickwinsList').innerHTML =
+        makeItems(extractSection(text, 'Quick'), 'dot-amber');
+
+      document.getElementById('missingList').innerHTML =
+        makeItems(extractSection(text, 'Missing'), 'dot-purple');
+
+      // One sentence summary
+      const summMatch = text.match(/One Sentence Summary[:\s]*\n?([^\n]+)/i);
+      if (summMatch) {
+        const box = document.getElementById('summaryBox');
+        box.textContent = summMatch[1].trim();
+        box.style.display = 'block';
+      }
+
+      // Roast
+      const roastMatch = text.match(/Roast[:\s]*\n([\s\S]*?)$/i);
+      if (roastMatch) {
+        const roastText = roastMatch[1].trim();
+        if (roastText) {
+          document.getElementById('roastText').textContent = roastText;
+          document.getElementById('roastBox').style.display = 'block';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
