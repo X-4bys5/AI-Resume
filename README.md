@@ -1,4 +1,4 @@
-# ai resume analyzer
+# AI-RESUME
 
 built this because i wanted feedback on my own resume without paying for those resume review sites. you upload a pdf and gemini reads it and gives you a score, strengths, weaknesses, and a few quick fixes. also roasts you a little at the end.
 
