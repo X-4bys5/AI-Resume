@@ -53,6 +53,6 @@ Visit `http://localhost:5000`
 ## Tech Stack
 
 - **Backend**: Python, Flask
-- **AI**: Google Gemini 1.5 Flash (native PDF reading)
+- **AI**: Google Gemini 2.5 Flash (native PDF reading)
 - **Deployment**: Render
 - **Frontend**: HTML, CSS, Vanilla JS
